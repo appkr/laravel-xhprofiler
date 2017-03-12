@@ -71,7 +71,7 @@ RUN git clone https://github.com/tideways/php-profiler-extension.git \
     && echo "tideways.auto_prepend_library=0" >> /etc/php/7.0/mods-available/tideways.ini \
     && phpenmod tideways
 
-WORKDIR $WWW_ROOT_DIR
+WORKDIR "$WWW_ROOT_DIR"
 
 #-------------------------------------------------------------------------------
 # Install Mongo DB (xhgui uses mongoDB)
@@ -101,7 +101,7 @@ RUN git clone https://github.com/perftools/xhgui.git /var/www/xhgui \
     # Slim has some bugs when extending base View class in Twig class
     && curl https://gist.githubusercontent.com/appkr/a1373932ded11b274af3b74055f5c0a1/raw/c393a9ebf2fa09710b0253778a8bb3f5ea9d418a/Twig.php > vendor/slim/views/Slim/Views/Twig.php \
     && curl https://gist.githubusercontent.com/appkr/cce0f4dbc4902022b3c6ac26ea49388c/raw/5feb2d0c187a2933c8f2fb0f0fec7f1e6984ce1b/View.php > vendor/slim/slim/Slim/View.php \
-    && curl https://gist.githubusercontent.com/appkr/13648361c92aa06d3d73536dca06e065/raw/a323ba8d18fec147c991d180a6fd8d94084817fd/config.default.php > /var/www/xhgui/config/config.default.php \
+#    && curl https://gist.githubusercontent.com/appkr/13648361c92aa06d3d73536dca06e065/raw/a323ba8d18fec147c991d180a6fd8d94084817fd/config.default.php > /var/www/xhgui/config/config.default.php \
     && a2ensite xhgui \
     && echo "Listen ${XHGUI_PORT}" >> /etc/apache2/ports.conf
 
@@ -131,14 +131,14 @@ RUN sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' "$APACHE_ENVVARS" 
 # Publish Applications
 #-------------------------------------------------------------------------------
 
-ADD . $WWW_ROOT_DIR
+ADD . "$WWW_ROOT_DIR"
 
 RUN a2dissite 000-default \
     && rm /etc/apache2/sites-available/000-default.conf \
     && a2ensite app \
     && a2enmod rewrite deflate headers \
-    && chmod -R 775 $WWW_ROOT_DIR/storage $WWW_ROOT_DIR/bootstrap/cache \
-    && chown -R www-data:www-data $WWW_ROOT_DIR/storage $WWW_ROOT_DIR/bootstrap/cache
+    && chmod -R 775 "$WWW_ROOT_DIR"/storage "$WWW_ROOT_DIR"/bootstrap/cache \
+    && chown -R "$APACHE_RUN_USER:$APACHE_RUN_GROUP" "$WWW_ROOT_DIR"/storage "$WWW_ROOT_DIR"/bootstrap/cache
 
 #-------------------------------------------------------------------------------
 # Install Cron Job
@@ -160,13 +160,13 @@ RUN apt-get remove -y \
         libssl-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-    && rm -rf $WWW_ROOT_DIR/php-profiler-extension
+    && rm -rf "$WWW_ROOT_DIR"/php-profiler-extension
 
 #-------------------------------------------------------------------------------
 # Run Environment
 #-------------------------------------------------------------------------------
 
-WORKDIR $WWW_ROOT_DIR
+WORKDIR "$WWW_ROOT_DIR"
 
 VOLUME ["/var/lib/mongodb/"]
 
